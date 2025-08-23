@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { X, Type, Palette } from "lucide-react";
+import { X, Type, Palette, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
@@ -16,6 +16,7 @@ interface SubtitleSettings {
   fontFamily: string;
   backgroundColor: string;
   textColor: string;
+  position: 'bottom' | 'center' | 'top';
 }
 
 interface SubtitleCustomizerProps {
@@ -175,6 +176,33 @@ export const SubtitleCustomizer = ({ settings, onSettingsChange, onClose }: Subt
                     />
                     <span className="text-sm font-medium">{bg.name}</span>
                   </div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Subtitle Position */}
+          <div className="space-y-3">
+            <Label className="text-base font-medium flex items-center">
+              <MapPin className="w-4 h-4 mr-2" />
+              Posisi Subtitle
+            </Label>
+            <div className="grid grid-cols-3 gap-3">
+              {[
+                { value: 'top', label: 'Atas' },
+                { value: 'center', label: 'Tengah' },
+                { value: 'bottom', label: 'Bawah' }
+              ].map((pos) => (
+                <button
+                  key={pos.value}
+                  onClick={() => handleSettingChange('position', pos.value)}
+                  className={`p-3 rounded-lg border-2 smooth-transition hover:scale-105 ${
+                    localSettings.position === pos.value
+                      ? 'border-primary bg-primary/10'
+                      : 'border-border bg-card hover:border-primary/50'
+                  }`}
+                >
+                  <span className="text-sm font-medium">{pos.label}</span>
                 </button>
               ))}
             </div>

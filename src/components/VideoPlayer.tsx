@@ -33,6 +33,7 @@ interface SubtitleSettings {
   fontFamily: string;
   backgroundColor: string;
   textColor: string;
+  position: 'bottom' | 'center' | 'top';
 }
 
 export const VideoPlayer = ({ videoUrl, subtitleUrl, fileName, onBack }: VideoPlayerProps) => {
@@ -52,7 +53,8 @@ export const VideoPlayer = ({ videoUrl, subtitleUrl, fileName, onBack }: VideoPl
     fontSize: 24,
     fontFamily: 'Arial',
     backgroundColor: 'rgba(0, 0, 0, 0.7)',
-    textColor: '#ffffff'
+    textColor: '#ffffff',
+    position: 'bottom'
   });
   const [subtitles, setSubtitles] = useState<string[]>([]);
   const [currentSubtitle, setCurrentSubtitle] = useState("");
@@ -205,7 +207,11 @@ export const VideoPlayer = ({ videoUrl, subtitleUrl, fileName, onBack }: VideoPl
       {/* Subtitle Overlay */}
       {currentSubtitle && (
         <div 
-          className="absolute bottom-24 left-1/2 transform -translate-x-1/2 subtitle-text text-center px-4 py-2 rounded-lg max-w-4xl"
+          className={`absolute left-1/2 transform -translate-x-1/2 subtitle-text text-center px-4 py-2 rounded-lg max-w-4xl ${
+            subtitleSettings.position === 'top' ? 'top-24' :
+            subtitleSettings.position === 'center' ? 'top-1/2 -translate-y-1/2' :
+            'bottom-24'
+          }`}
           style={{
             fontSize: `${subtitleSettings.fontSize}px`,
             fontFamily: subtitleSettings.fontFamily,
