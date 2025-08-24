@@ -9,7 +9,15 @@ import {
   SkipForward, 
   Settings,
   ArrowLeft,
-  Subtitles
+  Subtitles,
+  PlayCircle,
+  PauseCircle,
+  RotateCcw,
+  RotateCw,
+  Maximize2,
+  Volume1,
+  VolumeOff,
+  Cog
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
@@ -21,6 +29,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 interface VideoPlayerProps {
   videoUrl: string;
@@ -316,8 +329,45 @@ export const VideoPlayer = ({ videoUrl, subtitleUrl, fileName, onBack }: VideoPl
           </div>
         </div>
 
-        {/* Main Controls - Centered */}
-        <div className="flex items-center justify-center space-x-6 mb-4">
+        {/* Main Controls - All Centered */}
+        <div className="flex items-center justify-center space-x-8">
+          {/* Volume Control */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                variant="ghost"
+                size="lg"
+                className="text-white hover:bg-white/20 rounded-full p-4 hover:scale-110 transition-all"
+              >
+                {isMuted ? <VolumeOff className="w-6 h-6" /> : volume > 0.5 ? <Volume2 className="w-6 h-6" /> : <Volume1 className="w-6 h-6" />}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-40 p-4" side="top">
+              <div className="space-y-2">
+                <div className="flex items-center space-x-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={toggleMute}
+                    className="p-1"
+                  >
+                    {isMuted ? <VolumeOff className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                  </Button>
+                  <Slider
+                    value={[isMuted ? 0 : volume]}
+                    max={1}
+                    step={0.01}
+                    onValueChange={handleVolumeChange}
+                    className="flex-1"
+                  />
+                </div>
+                <div className="text-center text-sm text-muted-foreground">
+                  {Math.round((isMuted ? 0 : volume) * 100)}%
+                </div>
+              </div>
+            </PopoverContent>
+          </Popover>
+
           {/* Skip Back */}
           <Button
             variant="ghost"
@@ -325,7 +375,7 @@ export const VideoPlayer = ({ videoUrl, subtitleUrl, fileName, onBack }: VideoPl
             onClick={() => skipTime(-10)}
             className="text-white hover:bg-white/20 rounded-full p-4 hover:scale-110 transition-all"
           >
-            <SkipBack className="w-7 h-7" />
+            <RotateCcw className="w-7 h-7" />
           </Button>
 
           {/* Play/Pause */}
@@ -333,9 +383,9 @@ export const VideoPlayer = ({ videoUrl, subtitleUrl, fileName, onBack }: VideoPl
             variant="ghost"
             size="lg"
             onClick={togglePlay}
-            className="text-white hover:bg-white/20 w-16 h-16 rounded-full bg-white/10 hover:bg-white/20 hover:scale-110 transition-all shadow-lg"
+            className="text-white hover:bg-white/20 w-20 h-20 rounded-full bg-white/10 hover:bg-white/20 hover:scale-110 transition-all shadow-2xl border border-white/20"
           >
-            {isPlaying ? <Pause className="w-9 h-9" /> : <Play className="w-9 h-9 ml-1" />}
+            {isPlaying ? <PauseCircle className="w-12 h-12" /> : <PlayCircle className="w-12 h-12" />}
           </Button>
 
           {/* Skip Forward */}
@@ -345,66 +395,41 @@ export const VideoPlayer = ({ videoUrl, subtitleUrl, fileName, onBack }: VideoPl
             onClick={() => skipTime(10)}
             className="text-white hover:bg-white/20 rounded-full p-4 hover:scale-110 transition-all"
           >
-            <SkipForward className="w-7 h-7" />
+            <RotateCw className="w-7 h-7" />
           </Button>
-        </div>
 
-        {/* Secondary Controls */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            {/* Volume Control */}
-            <div className="flex items-center space-x-3">
-              <Button
-                variant="ghost"
-                size="lg"
-                onClick={toggleMute}
-                className="text-white hover:bg-white/20 rounded-full p-3"
-              >
-                {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+          {/* Playback Speed */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="lg" className="text-white hover:bg-white/20 rounded-full p-4 hover:scale-110 transition-all">
+                <Cog className="w-6 h-6" />
               </Button>
-              <div className="w-28">
-                <Slider
-                  value={[isMuted ? 0 : volume]}
-                  max={1}
-                  step={0.01}
-                  onValueChange={handleVolumeChange}
-                />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <div className="px-2 py-1 text-sm font-medium text-muted-foreground">
+                Kecepatan Putar
               </div>
-            </div>
-          </div>
+              {[0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2].map((rate) => (
+                <DropdownMenuItem
+                  key={rate}
+                  onClick={() => changePlaybackRate(rate)}
+                  className={playbackRate === rate ? "bg-primary text-primary-foreground" : ""}
+                >
+                  {rate}x {rate === 1 && "(Normal)"}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
 
-          <div className="flex items-center space-x-4">
-            {/* Playback Speed */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="lg" className="text-white hover:bg-white/20 rounded-full px-4 py-3">
-                  <Settings className="w-5 h-5 mr-2" />
-                  <span className="text-sm">{playbackRate}x</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                {[0.25, 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2].map((rate) => (
-                  <DropdownMenuItem
-                    key={rate}
-                    onClick={() => changePlaybackRate(rate)}
-                    className={playbackRate === rate ? "bg-primary text-primary-foreground" : ""}
-                  >
-                    {rate}x
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            {/* Fullscreen */}
-            <Button
-              variant="ghost"
-              size="lg"
-              onClick={toggleFullscreen}
-              className="text-white hover:bg-white/20 rounded-full p-3"
-            >
-              <Maximize className="w-5 h-5" />
-            </Button>
-          </div>
+          {/* Fullscreen */}
+          <Button
+            variant="ghost"
+            size="lg"
+            onClick={toggleFullscreen}
+            className="text-white hover:bg-white/20 rounded-full p-4 hover:scale-110 transition-all"
+          >
+            <Maximize2 className="w-6 h-6" />
+          </Button>
         </div>
       </div>
 

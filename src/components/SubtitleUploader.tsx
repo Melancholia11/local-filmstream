@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { X, Upload, FileText, Settings } from "lucide-react";
+import { X, Upload, FileText, Settings, CloudUpload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
 
 interface SubtitleUploaderProps {
   onSubtitleLoad: (url: string) => void;
@@ -11,12 +12,23 @@ interface SubtitleUploaderProps {
 
 export const SubtitleUploader = ({ onSubtitleLoad, onOpenSettings, onClose }: SubtitleUploaderProps) => {
   const [dragActive, setDragActive] = useState(false);
+  const { toast } = useToast();
 
   const handleFileSelect = (file: File) => {
     if (file && file.name.endsWith('.srt')) {
       const url = URL.createObjectURL(file);
       onSubtitleLoad(url);
+      toast({
+        title: "Subtitle berhasil dimuat",
+        description: `File ${file.name} telah dimuat.`,
+      });
       onClose();
+    } else {
+      toast({
+        title: "Format file tidak didukung",
+        description: "Silakan pilih file dengan format .srt",
+        variant: "destructive",
+      });
     }
   };
 
@@ -61,7 +73,7 @@ export const SubtitleUploader = ({ onSubtitleLoad, onOpenSettings, onClose }: Su
         <div className="space-y-6">
           {/* File Upload Area */}
           <div
-            className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors ${
+            className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors cursor-pointer ${
               dragActive 
                 ? 'border-primary bg-primary/10' 
                 : 'border-border hover:border-primary/50'
@@ -70,18 +82,14 @@ export const SubtitleUploader = ({ onSubtitleLoad, onOpenSettings, onClose }: Su
             onDragLeave={handleDrag}
             onDragOver={handleDrag}
             onDrop={handleDrop}
+            onClick={() => document.getElementById('subtitle-file')?.click()}
           >
-            <Upload className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+            <CloudUpload className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
             <p className="text-lg font-medium mb-2">Upload File Subtitle</p>
             <p className="text-sm text-muted-foreground mb-4">
               Drag & drop file .srt atau klik untuk memilih
             </p>
             
-            <Label htmlFor="subtitle-file">
-              <Button variant="outline" className="cursor-pointer">
-                Pilih File
-              </Button>
-            </Label>
             <input
               id="subtitle-file"
               type="file"
@@ -91,8 +99,13 @@ export const SubtitleUploader = ({ onSubtitleLoad, onOpenSettings, onClose }: Su
                 if (e.target.files?.[0]) {
                   handleFileSelect(e.target.files[0]);
                 }
+                e.target.value = ''; // Reset input
               }}
             />
+            
+            <Button variant="outline" className="pointer-events-none">
+              Pilih File
+            </Button>
           </div>
 
           {/* Settings Button */}
